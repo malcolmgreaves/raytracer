@@ -1,5 +1,5 @@
 use point::Point;
-use vector::Vector3;
+
 use scene::{Scene, Element, Sphere, Plane, Color, Intersection, SurfaceType};
 use std::f32;
 
@@ -66,9 +66,9 @@ impl Ray {
             None
         } else {
             Some(Ray {
-                origin: intersection + (ref_n * -bias),
-                direction: (incident + i_dot_n * ref_n) * eta - ref_n * k.sqrt(),
-            })
+                     origin: intersection + (ref_n * -bias),
+                     direction: (incident + i_dot_n * ref_n) * eta - ref_n * k.sqrt(),
+                 })
         }
     }
 }
@@ -164,17 +164,19 @@ impl Intersectable for Plane {
     }
 
     fn texture_coords(&self, hit_point: &Point) -> TextureCoords {
-        let mut x_axis = self.normal.cross(&Vector3 {
-            x: 0.0,
-            y: 0.0,
-            z: 1.0,
-        });
+        let mut x_axis = self.normal
+            .cross(&Vector3 {
+                        x: 0.0,
+                        y: 0.0,
+                        z: 1.0,
+                    });
         if x_axis.length() == 0.0 {
-            x_axis = self.normal.cross(&Vector3 {
-                x: 0.0,
-                y: 1.0,
-                z: 0.0,
-            });
+            x_axis = self.normal
+                .cross(&Vector3 {
+                            x: 0.0,
+                            y: 1.0,
+                            z: 0.0,
+                        });
         }
         let y_axis = self.normal.cross(&x_axis);
         let hit_vec = *hit_point - self.origin;
@@ -241,10 +243,14 @@ fn get_color(scene: &Scene, ray: &Ray, intersection: &Intersection, depth: u32) 
             color = color + (cast_ray(scene, &reflection_ray, depth + 1) * reflectivity);
             color
         }
-        SurfaceType::Refractive { index, transparency } => {
+        SurfaceType::Refractive {
+            index,
+            transparency,
+        } => {
             let mut refraction_color = BLACK;
             let kr = fresnel(ray.direction, normal, index) as f32;
-            let surface_color = material.coloration
+            let surface_color = material
+                .coloration
                 .color(&intersection.element.texture_coords(&hit));
 
             if kr < 1.0 {
@@ -292,6 +298,7 @@ pub fn cast_ray(scene: &Scene, ray: &Ray, depth: u32) -> Color {
     }
 
     let intersection = scene.trace(&ray);
-    intersection.map(|i| get_color(scene, &ray, &i, depth))
+    intersection
+        .map(|i| get_color(scene, &ray, &i, depth))
         .unwrap_or(BLACK)
 }
